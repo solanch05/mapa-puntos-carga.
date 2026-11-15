@@ -10,6 +10,7 @@ Sección 7 del documento: "Antes del demo (no omitir): cargar 10 a 15 puntos
 de ejemplo en la zona piloto".
 """
 
+import os
 from datetime import time, timedelta
 
 from django.contrib.gis.geos import Point
@@ -22,7 +23,9 @@ from apps.puntos.models import EstadoPublicacion, Horario, PuntoCarga
 from apps.reportes.models import ReporteEstado
 from apps.usuarios.models import Rol, Usuario
 
-CONTRASENA_DEMO = "Demo1234!"
+# En un servidor público NO uses la contraseña por defecto: está en el README.
+CONTRASENA_DEMO = os.environ.get("DEMO_PASSWORD", "Demo1234!")
+
 DOMINIO = "demo.local"
 
 USUARIOS = [

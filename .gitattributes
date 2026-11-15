@@ -1,0 +1,4 @@
+# Los scripts de shell siempre con finales de línea de Linux (LF),
+# aunque se editen en Windows; si no, fallan dentro de Docker.
+*.sh text eol=lf
+Dockerfile* text eol=lf

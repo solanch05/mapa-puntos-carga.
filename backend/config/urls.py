@@ -3,11 +3,13 @@ Mapa de URLs de la API. Un solo punto de entrada: /api/...
 El panel de moderación es el admin de Django: /admin/
 """
 
+from pathlib import Path
+
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.http import JsonResponse
-from django.urls import include, path
+from django.http import FileResponse, Http404, JsonResponse
+from django.urls import include, path, re_path
 from rest_framework.routers import DefaultRouter
 
 from apps.ia.views import BorradorView
@@ -60,5 +62,23 @@ urlpatterns = [
     path("api/", include(api)),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Fotos de reportes. En el despliegue de un solo servicio no hay nginx delante,
+# así que Django las sirve también fuera de DEBUG (volumen pequeño).
+if settings.DEBUG or settings.FRONTEND_DIST:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT, show_indexes=False)
+    if not settings.DEBUG:
+        from django.views.static import serve
+
+        urlpatterns += [re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT})]
+
+
+def spa(request, ruta=""):
+    """Cualquier ruta que no sea de la API devuelve la app de React (React Router decide)."""
+    indice = Path(settings.FRONTEND_DIST) / "index.html"
+    if not indice.is_file():
+        raise Http404
+    return FileResponse(indice.open("rb"), content_type="text/html")
+
+
+if settings.FRONTEND_DIST:
+    urlpatterns += [re_path(r"^(?!api/|admin/|static/|media/)(?P<ruta>.*)$", spa)]

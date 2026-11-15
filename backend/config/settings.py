@@ -6,9 +6,11 @@ variables de entorno. Así no hay secretos en el repositorio (sección 10 del
 documento: "Claves en variables de entorno").
 """
 
+import mimetypes
 import os
 from datetime import timedelta
 from pathlib import Path
+from urllib.parse import unquote, urlparse
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -90,6 +92,18 @@ DATABASES = {
     }
 }
 
+if url_bd := os.environ.get("DATABASE_URL"):
+    partes = urlparse(url_bd)
+    DATABASES["default"].update(
+        {
+            "NAME": partes.path.lstrip("/"),
+            "USER": unquote(partes.username or ""),
+            "PASSWORD": unquote(partes.password or ""),
+            "HOST": partes.hostname,
+            "PORT": str(partes.port or 5432),
+        }
+    )
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "usuarios.Usuario"
 
@@ -108,6 +122,15 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Despliegue en un solo servicio: Django sirve también la PWA compilada.
+# WhiteNoise entrega sus archivos (index.html, sw.js, assets...) desde la raíz.
+FRONTEND_DIST = os.environ.get("FRONTEND_DIST", "")
+if FRONTEND_DIST and Path(FRONTEND_DIST).is_dir():
+    WHITENOISE_ROOT = FRONTEND_DIST
+    WHITENOISE_INDEX_FILE = True
+    mimetypes.add_type("application/manifest+json", ".webmanifest")
+
 MEDIA_URL = "/media/"
 MEDIA_ROOT = Path(os.environ.get("DJANGO_MEDIA_ROOT", BASE_DIR / "media"))
 DATA_UPLOAD_MAX_MEMORY_SIZE = 6 * 1024 * 1024
