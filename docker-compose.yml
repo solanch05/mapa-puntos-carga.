@@ -1,0 +1,39 @@
+# Levanta todo con: docker compose up --build   ->  http://localhost:8080
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-puntos}
+      POSTGRES_USER: ${POSTGRES_USER:-puntos}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-puntos}
+    volumes:
+      - datos_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-puntos}"]
+      interval: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    env_file: .env
+    environment:
+      POSTGRES_HOST: db
+      DJANGO_MEDIA_ROOT: /app/media
+    volumes:
+      - media:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "${PUERTO_WEB:-8080}:80"
+    volumes:
+      - media:/srv/media:ro
+    depends_on:
+      - backend
+
+volumes:
+  datos_db:
+  media:

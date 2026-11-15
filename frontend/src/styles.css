@@ -1,0 +1,182 @@
+/* Diseñado primero para móvil. Sin librerías de UI: páginas ligeras. */
+
+:root {
+  --fondo: #f8fafc;
+  --tinta: #0f172a;
+  --suave: #64748b;
+  --borde: #e2e8f0;
+  --primario: #0f172a;
+  --acento: #facc15;
+  --ok: #16a34a;
+  --error: #dc2626;
+  --aviso: #b45309;
+  --radio: 12px;
+  --barra: 56px;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--tinta);
+  background: var(--fondo);
+  -webkit-text-size-adjust: 100%;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+h1 { font-size: 1.4rem; margin: 0 0 1rem; }
+h2 { font-size: 1.25rem; margin: 0 0 .25rem; padding-right: 2rem; }
+h3 { font-size: 1rem; margin: 1rem 0 .5rem; }
+a { color: #1d4ed8; }
+button, input, select, textarea { font: inherit; }
+input, select, textarea {
+  width: 100%; padding: .65rem .75rem; border: 1px solid var(--borde); border-radius: 8px; background: #fff;
+}
+label { display: grid; gap: .3rem; font-weight: 500; }
+small, .nota { color: var(--suave); font-weight: 400; }
+.nota { font-size: .9rem; margin: .5rem 0; }
+.centrado { text-align: center; padding: 2rem; }
+
+.app { min-height: 100dvh; display: flex; flex-direction: column; }
+.contenido { flex: 1; display: flex; flex-direction: column; }
+
+/* --- Barra superior --------------------------------------------------------- */
+.barra {
+  height: var(--barra); display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1rem; background: var(--primario); color: #fff; position: sticky; top: 0; z-index: 1000;
+}
+.marca { display: flex; align-items: center; gap: .5rem; color: #fff; text-decoration: none; font-weight: 700; }
+.boton-menu { background: none; border: 0; color: #fff; font-size: 1.5rem; cursor: pointer; }
+.menu {
+  display: none; position: absolute; top: var(--barra); left: 0; right: 0; background: var(--primario);
+  flex-direction: column; padding: .5rem 1rem 1rem; gap: .25rem;
+}
+.menu.abierto { display: flex; }
+.menu a, .menu .enlace { color: #e2e8f0; text-decoration: none; padding: .6rem 0; text-align: left; }
+.menu a.active { color: var(--acento); }
+.reputacion { color: var(--acento); padding: .6rem 0; }
+@media (min-width: 800px) {
+  .boton-menu { display: none; }
+  .menu { display: flex; position: static; flex-direction: row; align-items: center; padding: 0; gap: 1.25rem; background: none; }
+}
+
+.aviso-conexion { background: #fef3c7; color: #78350f; padding: .5rem 1rem; font-size: .9rem; text-align: center; }
+
+/* --- Botones ---------------------------------------------------------------- */
+.boton, .acciones button, .botones-flotantes button {
+  display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+  padding: .7rem 1rem; border-radius: 10px; border: 1px solid var(--borde); background: #fff;
+  color: var(--tinta); text-decoration: none; cursor: pointer; font-weight: 600; min-height: 44px;
+}
+.boton.primario { background: var(--primario); color: #fff; border-color: var(--primario); }
+.boton.secundario { background: #f1f5f9; }
+.boton.peligro { color: var(--error); border-color: #fecaca; background: #fff; }
+.boton:disabled { opacity: .6; }
+.ancho { width: 100%; }
+.enlace { background: none; border: 0; color: #1d4ed8; padding: .25rem 0; cursor: pointer; text-decoration: underline; }
+
+.chip {
+  white-space: nowrap; border: 1px solid var(--borde); background: #fff; border-radius: 999px;
+  padding: .45rem .8rem; cursor: pointer; font-size: .9rem; color: var(--tinta);
+}
+.chip.activo { background: var(--primario); color: #fff; border-color: var(--primario); }
+.chip.activo.verde { background: var(--ok); border-color: var(--ok); }
+.chip.pequeno { padding: .3rem .55rem; font-size: .8rem; }
+.chip.selector { display: inline-flex; flex-direction: row; align-items: center; gap: .3rem; font-weight: 400; }
+.chip.selector select { width: auto; border: 0; padding: 0 .2rem; background: transparent; }
+
+/* --- Página del mapa ---------------------------------------------------------- */
+.pagina-mapa { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.filtros { display: flex; gap: .5rem; overflow-x: auto; padding: .6rem 1rem; background: #fff; border-bottom: 1px solid var(--borde); }
+.estado-mapa { font-size: .85rem; color: var(--suave); padding: .35rem 1rem; background: #fff; }
+.zona-mapa { position: relative; flex: 1; min-height: 60dvh; }
+.mapa { position: absolute; inset: 0; }
+.botones-flotantes { position: absolute; right: .75rem; top: .75rem; z-index: 500; display: flex; flex-direction: column; gap: .5rem; }
+.botones-flotantes button { box-shadow: 0 2px 8px rgb(0 0 0 / .15); padding: .5rem .8rem; }
+.leyenda {
+  position: absolute; left: .75rem; bottom: 1.6rem; z-index: 400; background: rgb(255 255 255 / .92);
+  border-radius: 8px; padding: .4rem .6rem; font-size: .75rem; display: grid; gap: .15rem;
+}
+.leyenda i, .punto-color { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: .35rem; flex: none; }
+.pin { cursor: pointer; }
+
+.lista-puntos {
+  position: absolute; inset: auto 0 0 0; max-height: 55%; overflow-y: auto; z-index: 1001; margin: 0; padding: 0;
+  list-style: none; background: #fff; border-radius: var(--radio) var(--radio) 0 0; box-shadow: 0 -4px 16px rgb(0 0 0 / .15);
+}
+.lista-puntos button {
+  width: 100%; display: grid; grid-template-columns: auto 1fr; gap: .1rem .5rem; align-items: center; text-align: left;
+  padding: .75rem 1rem; border: 0; border-bottom: 1px solid var(--borde); background: none; cursor: pointer;
+}
+.lista-nombre { font-weight: 600; }
+.lista-meta { grid-column: 2; font-size: .85rem; color: var(--suave); }
+.vacio { padding: 1rem; color: var(--suave); }
+
+/* --- Ficha (hoja inferior en móvil, panel lateral en escritorio) ------------- */
+.ficha {
+  position: absolute; z-index: 1001; inset: auto 0 0 0; max-height: 75%; overflow-y: auto; background: #fff;
+  border-radius: 16px 16px 0 0; padding: 1.1rem 1rem 1.5rem; box-shadow: 0 -6px 24px rgb(0 0 0 / .2);
+}
+@media (min-width: 800px) {
+  .ficha { inset: .75rem auto .75rem .75rem; width: 400px; max-height: none; border-radius: var(--radio); }
+  .lista-puntos { inset: .75rem auto .75rem .75rem; width: 360px; max-height: none; border-radius: var(--radio); }
+}
+.cerrar { position: absolute; right: .75rem; top: .75rem; border: 0; background: #f1f5f9; border-radius: 50%; width: 34px; height: 34px; cursor: pointer; }
+.subtitulo { margin: 0 0 .75rem; color: var(--suave); }
+.estado {
+  display: grid; gap: .1rem; padding: .7rem .9rem; border-radius: 10px; margin-bottom: .75rem;
+  border-left: 6px solid var(--color); background: color-mix(in srgb, var(--color) 10%, white);
+}
+.estado strong { color: var(--color); font-size: 1.1rem; }
+.estado span { font-size: .9rem; color: var(--suave); }
+
+.reporte h3 { margin-top: 1rem; }
+.botones-estado { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.botones-estado button {
+  min-height: 52px; border-radius: 10px; border: 2px solid var(--color); background: #fff; color: var(--color);
+  font-weight: 700; cursor: pointer;
+}
+.botones-estado button:active { background: var(--color); color: #fff; }
+.extra-reporte { display: grid; gap: .5rem; margin-top: .5rem; }
+
+.datos { display: grid; grid-template-columns: auto 1fr; gap: .4rem .9rem; margin: 1rem 0; }
+.datos dt { color: var(--suave); }
+.datos dd { margin: 0; }
+.buenas-practicas { background: #f1f5f9; padding: .6rem .75rem; border-radius: 8px; }
+.acciones { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; align-items: center; }
+.acciones button { min-height: 40px; padding: .45rem .8rem; }
+.contacto { font-weight: 600; }
+.reportes { list-style: none; padding: 0; margin: 0; display: grid; gap: .5rem; font-size: .9rem; }
+.reportes li { display: flex; gap: .4rem; align-items: baseline; }
+.pie-ficha { color: var(--suave); font-size: .8rem; margin-top: 1rem; }
+.denuncia { display: grid; gap: .6rem; margin-top: .75rem; padding: .75rem; background: #fef2f2; border-radius: 10px; }
+
+/* --- Mensajes ---------------------------------------------------------------- */
+.mensaje { padding: .6rem .8rem; border-radius: 8px; font-size: .92rem; }
+.mensaje.ok { background: #dcfce7; color: #14532d; }
+.mensaje.error { background: #fee2e2; color: #7f1d1d; }
+.mensaje.aviso { background: #fef3c7; color: #78350f; }
+.mensaje ul { margin: .3rem 0 0; padding-left: 1.2rem; }
+span.mensaje { padding: 0; background: none; }
+
+/* --- Páginas de formulario y listas ---------------------------------------- */
+.pagina { width: 100%; max-width: 720px; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+.formulario { display: grid; gap: 1rem; }
+.formulario.estrecho { max-width: 420px; }
+fieldset { border: 1px solid var(--borde); border-radius: var(--radio); padding: .75rem; display: grid; gap: .75rem; margin: 0; }
+legend { font-weight: 600; padding: 0 .3rem; }
+.dos-columnas { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+.casilla { display: flex; align-items: center; gap: .5rem; font-weight: 400; }
+.casilla input { width: auto; }
+.fila { display: flex; gap: .75rem; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.fila label { display: flex; align-items: center; gap: .4rem; }
+.fila input[type='time'] { width: auto; }
+.mapa-pequeno { height: 260px; border-radius: 10px; }
+.editor-horarios { display: grid; gap: .75rem; }
+.franja { gap: .5rem; }
+.dias { display: flex; gap: .35rem; flex-wrap: wrap; align-items: center; }
+.asistente { background: #eef2ff; border-radius: var(--radio); padding: .9rem; display: grid; gap: .5rem; }
+.asistente h3 { margin: 0; }
+
+.tarjetas { list-style: none; padding: 0; display: grid; gap: .75rem; }
+.tarjeta { background: #fff; border: 1px solid var(--borde); border-radius: var(--radio); padding: .9rem; display: grid; gap: .4rem; }
+.etiqueta { font-size: .78rem; padding: .2rem .55rem; border-radius: 999px; background: #e2e8f0; }
+.etiqueta.ok { background: #dcfce7; color: #14532d; }
+.etiqueta.aviso { background: #fef3c7; color: #78350f; }
+.etiqueta.error { background: #fee2e2; color: #7f1d1d; }

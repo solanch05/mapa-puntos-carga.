@@ -1,0 +1,103 @@
+# Integración continua: en cada push y pull request corre estilo, pruebas,
+# build, prueba end-to-end y auditoría de dependencias (sección 9 y 10).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-24.04
+    services:
+      db:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: puntos
+          POSTGRES_USER: puntos
+          POSTGRES_PASSWORD: puntos
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U puntos" --health-interval 5s --health-retries 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: sudo apt-get update && sudo apt-get install -y gdal-bin libgdal-dev
+      - run: pip install -r requirements-dev.txt
+      - name: Estilo (ruff)
+        run: ruff check . && ruff format --check .
+      - name: Migraciones al día
+        run: python manage.py makemigrations --check --dry-run
+      - name: Pruebas (pytest sobre PostGIS)
+        run: pytest
+      - name: Auditoría de dependencias
+        run: pip-audit -r requirements.txt
+
+  frontend:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - name: Auditoría de dependencias de producción
+        run: npm audit --omit=dev --audit-level=high
+
+  e2e:
+    needs: [backend, frontend]
+    runs-on: ubuntu-24.04
+    services:
+      db:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: puntos
+          POSTGRES_USER: puntos
+          POSTGRES_PASSWORD: puntos
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U puntos" --health-interval 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: sudo apt-get update && sudo apt-get install -y gdal-bin libgdal-dev
+      - name: Backend con datos de demo
+        working-directory: backend
+        run: |
+          pip install -r requirements.txt
+          python manage.py migrate --noinput
+          python manage.py sembrar_demo
+          python manage.py runserver 8000 &
+      - name: Playwright
+        working-directory: frontend
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: frontend/playwright-report

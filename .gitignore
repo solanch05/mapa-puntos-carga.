@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.sqlite3
+backend/media/
+backend/staticfiles/
+
+# Node
+node_modules/
+frontend/dist/
+frontend/dev-dist/
+frontend/playwright-report/
+frontend/test-results/
+
+# Entorno y secretos (se sube solo la plantilla)
+.env
+.env.*
+!.env.example
+
+# Logs, sistema y editores
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
