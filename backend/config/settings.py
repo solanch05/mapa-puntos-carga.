@@ -28,6 +28,8 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "solo-para-desarrollo-cambiar-e
 DEBUG = env_bool("DJANGO_DEBUG", True)
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost:8080")
+# Enviar el origen a otros sitios: OpenStreetMap lo exige para servir las losetas del mapa.
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
 INSTALLED_APPS = [
     "django.contrib.admin",
